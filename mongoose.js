@@ -1,14 +1,13 @@
 const mongoose = require("mongoose");
-const mongodb = require("mongodb");
 const dotenv = require("dotenv"); // To Store things i dont want display in my source code
 
 // Configuring of installed MongoDB & Dotenv modules
 dotenv.config();
-mongodb.config();
 
-mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URL)
 .then(() => console.log("Connected to MongoDB"))
 .catch(err => console.log("Error Connecting to MongoDB: ", err));
+
 
 // Define the Person schema
 const personSchema = new mongoose.Schema({
@@ -108,4 +107,43 @@ function findPersonByIdAndUpdate(personId) {
   }
 
 //Deleting One Document Using .findByIdAndRemove
+
+function deletePersonById(personId) {
+    Person.findByIdAndRemove(personId, (err, deletedPerson) => {
+      if (err) {
+        console.error('Error deleting person:', err);
+      } else {
+        console.log('Person deleted:', deletedPerson);
+      }
+    });
+  }
+
+// Deleting Many Documents with model.remove()
+
+function deletePeopleByName(name) {
+    Person.remove({ name }, (err, result) => {
+      if (err) {
+        console.error('Error deleting people:', err);
+      } else {
+        console.log('People deleted:', result);
+      }
+    });
+  }
+  
+// Performing a Chain Search Query Helpers to Narrow Search Results
+
+function findPeopleByFood(food) {
+    Person.find({ favoriteFoods: food })
+      .sort({ name: 1 })
+      .limit(2)
+      .select('-age') // Excluding the 'age' field
+      .exec((err, data) => {
+        if (err) {
+          console.error('Error finding people:', err);
+        } else {
+          console.log('People found:', data);
+        }
+      });
+  }
+
 
